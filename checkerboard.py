@@ -55,8 +55,8 @@ def get_init():
     for x in range(BOARD_SIZE):
         for y in range(BOARD_SIZE):
             is_white = (x + y) % 2 != 0
-            is_top = y < 1
-            is_bottom = y >= BOARD_SIZE - 1
+            is_top = y < 3
+            is_bottom = y >= BOARD_SIZE - 3
             index = coord_to_index(x, y)
 
             if is_white and (is_bottom or is_top):
