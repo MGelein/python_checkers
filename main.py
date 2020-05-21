@@ -50,7 +50,8 @@ def main():
         checkerboard.clear_target()
         if to_index != -1: 
             board = checkerboard.move_piece(board, sel_index, to_index)
-            board = checkerboard.transfer_turn(board)
+            if len(checkerboard.get_possible_jumps(board)) == 0:
+                board = checkerboard.transfer_turn(board)
 
 # Find the correct entry point to start running the code if this is the main module
 if __name__ == '__main__':
