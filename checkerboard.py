@@ -19,7 +19,7 @@ BLACK_KING = 4
 WHITE = 5
 BLACK = 6
 
-PIECES_TO_STR = (' ', '●', '●', '●', '●')
+PIECES_TO_STR = (' ', '●', '◉', '●', '◉')
 
 def set_target(index):
     """Sets one of the possible highlighted target squares"""
@@ -60,7 +60,7 @@ def get_init():
             index = coord_to_index(x, y)
 
             if is_white and (is_bottom or is_top):
-                piece = WHITE_PAWN if is_bottom else BLACK_PAWN
+                piece = WHITE_KING if is_bottom else BLACK_PAWN
                 board = set_piece(board, index, piece)
     return board
 
