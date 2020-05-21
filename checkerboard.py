@@ -2,6 +2,14 @@ import terminal
 import math
 from functools import lru_cache
 
+terminal.save_style('edge', terminal.bg_blue, terminal.fg_gray)
+terminal.save_style('white_cell', terminal.bg_white)
+terminal.save_style('magenta_cell', terminal.bg_magenta)
+terminal.save_style('black_cell_white_piece', terminal.bg_green, terminal.fg_white)
+terminal.save_style('black_cell_black_piece', terminal.bg_green, terminal.fg_black)
+terminal.save_style('red_cell_white_piece', terminal.bg_red, terminal.fg_white)
+terminal.save_style('red_cell_black_piece', terminal.bg_red, terminal.fg_black)
+
 BOARD_SIZE = 8
 CELLS = BOARD_SIZE * BOARD_SIZE
 ALPHABET = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ'
@@ -259,12 +267,13 @@ def print_board(board, clear_screen=True):
         if x == 0: _print_vertical_header(BOARD_SIZE - y)
 
         piece = get_piece(board, index)
-        bg_col = terminal.bg_white if (x + y) % 2 == 0 else terminal.bg_green
-        if index in SELECTED: bg_col = terminal.bg_red
-        elif index in TARGETS: bg_col = terminal.bg_magenta
-
-        fg_col = terminal.fg_white if piece <= WHITE_KING else terminal.fg_black
-        terminal.set_immediate_style(bg_col, fg_col)
+        is_white_cell = (x + y) % 2 == 0
+        is_white_piece = piece <= WHITE_KING
+        is_selected = index in SELECTED
+        is_targeted = index in TARGETS
+        style = get_style(is_white_cell, is_white_piece, is_selected, is_targeted)
+        terminal.set_style(style)
+        
         str_piece = PIECES_TO_STR[piece]
         print(' %s ' % str_piece, end='')
 
@@ -277,6 +286,17 @@ def print_board(board, clear_screen=True):
     
     terminal.set_style('default')
     print('')
+
+@lru_cache(maxsize=4)
+def get_style(is_white_cell, is_white_piece, is_selected, is_targeted):
+    """Returns the associated style for the provided combination of piece and cell"""
+    if is_white_cell: return 'white_cell'
+    elif is_targeted: return 'magenta_cell'
+    elif is_selected:
+        if is_white_piece: return 'red_cell_white_piece'
+        else: return 'red_cell_black_piece'
+    elif is_white_piece: return 'black_cell_white_piece'
+    else: return 'black_cell_black_piece'
 
 @lru_cache(maxsize=CELLS)
 def name_to_index(name):
@@ -309,7 +329,7 @@ def index_to_coord(i):
 
 def _print_horizontal_header():
     """Prints the horizontal header, put here to prevent code repetition"""
-    terminal.set_immediate_style(terminal.bg_blue, terminal.fg_gray)
+    terminal.set_style('edge')
     header = [' %s ' % ALPHABET[index] for index in range(BOARD_SIZE)]
     header.insert(0, '   ')
     header.append('   ')
@@ -317,5 +337,5 @@ def _print_horizontal_header():
 
 def _print_vertical_header(index):
     """Prints the left and right hand side headers"""
-    terminal.set_immediate_style(terminal.bg_blue, terminal.fg_gray)
+    terminal.set_style('edge')
     print(' %d ' % index, end='')
