@@ -55,36 +55,48 @@ def get_init():
     for x in range(BOARD_SIZE):
         for y in range(BOARD_SIZE):
             is_white = (x + y) % 2 != 0
-            is_top = y < 3
-            is_bottom = y >= BOARD_SIZE - 3
+            is_top = y < 1
+            is_bottom = y >= BOARD_SIZE - 1
             index = coord_to_index(x, y)
 
             if is_white and (is_bottom or is_top):
-                piece = WHITE_KING if is_bottom else BLACK_PAWN
+                piece = WHITE_PAWN if is_bottom else BLACK_PAWN
                 board = set_piece(board, index, piece)
     return board
+
+def _promote(piece):
+    """Returns the promoted form of a piece"""
+    return (EMPTY, WHITE_KING, WHITE_KING, BLACK_KING, BLACK_KING)[piece]
 
 def move_piece(board, source_index, dest_index):
     """Moves the piece from the source index to the destination index"""
     piece = get_piece(board, source_index)
+    player = get_current_player(board)
+    dest_x, dest_y = index_to_coord(dest_index)
+    if (dest_y == 0 and player == WHITE) or (dest_y == BOARD_SIZE - 1 and player == BLACK):
+        piece = _promote(piece)
+
     board = set_piece(board, dest_index, piece)
     board = set_piece(board, source_index, EMPTY)
 
     source_x, source_y = index_to_coord(source_index)
     dest_x, dest_y = index_to_coord(dest_index)
     diff = abs(source_x - dest_x)
-    if diff == 1: return board
+    if diff == 1: return board, False
 
     dir_x = 1 if dest_x > source_x else -1
     dir_y = 1 if dest_y > source_y else -1
 
+    jumped = False
     for offset in range(1, diff):
         off_x = dir_x * offset
         off_y = dir_y * offset
         off_index = coord_to_index(source_x + off_x, source_y + off_y)
+        piece = get_piece(board, off_index)
+        if piece != EMPTY: jumped = True
         board = set_piece(board, off_index, EMPTY)
 
-    return board
+    return board, jumped
 
 def get_piece(board, index):
     """Returns the nth piece of the provided board"""
@@ -167,7 +179,9 @@ def _jumped_over_single_piece(board, source, dest):
         if piece == EMPTY: 
             continue        
         if player == BLACK and piece < BLACK_PAWN: jumped += 1
+        elif player == BLACK and piece >= BLACK_PAWN: return False
         if player == WHITE and piece >= BLACK_PAWN: jumped += 1
+        elif player == WHITE and piece < BLACK_PAWN: return False
 
         if jumped >= 2: break
 
