@@ -68,7 +68,7 @@ def get_init():
             index = coord_to_index(x, y)
 
             if is_white and (is_bottom or is_top):
-                piece = WHITE_KING if is_bottom else BLACK_PAWN
+                piece = WHITE_PAWN if is_bottom else BLACK_PAWN
                 board = set_piece(board, index, piece)
     return board
 
