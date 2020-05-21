@@ -64,6 +64,7 @@ def get_init():
                 board = set_piece(board, index, piece)
     return board
 
+@lru_cache(maxsize=4)
 def _promote(piece):
     """Returns the promoted form of a piece"""
     return (EMPTY, WHITE_KING, WHITE_KING, BLACK_KING, BLACK_KING)[piece]
