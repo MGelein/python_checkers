@@ -68,7 +68,7 @@ def get_init():
             index = coord_to_index(x, y)
 
             if is_white and (is_bottom or is_top):
-                piece = WHITE_PAWN if is_bottom else BLACK_PAWN
+                piece = WHITE_KING if is_bottom else BLACK_PAWN
                 board = set_piece(board, index, piece)
     return board
 
@@ -78,7 +78,7 @@ def _promote(piece):
     return (EMPTY, WHITE_KING, WHITE_KING, BLACK_KING, BLACK_KING)[piece]
 
 def move_piece(board, source_index, dest_index):
-    """Moves the piece from the source index to the destination index"""
+    """Moves the piece from the source index to the destination index, returns the modified board and if we jumped a piece"""
     piece = get_piece(board, source_index)
     player = get_current_player(board)
     dest_x, dest_y = index_to_coord(dest_index)
@@ -147,25 +147,22 @@ def get_possible_jumps_from(board, index):
     is_pawn = piece % 2 != 0
     is_black = piece >= BLACK_PAWN
     x, y = index_to_coord(index)
-    direction = 1 if is_black else -1
+    directions = [1, -1] if not is_pawn else ([1] if is_black else [-1])
     length = 2 if is_pawn else BOARD_SIZE
 
-    legals = []
-    for dist in range(2, length + 1):
-        forward = y + (direction * dist)
-        backward = y - (direction * dist)
-        left = x - dist
-        right = x + dist
-        legals += [(left, forward), (right, forward)]
-        if not is_pawn: legals += [(left, backward), (right, backward)]
-
     jumps = []
-    for x, y in legals:
-        if x < 0 or x >= BOARD_SIZE or y < 0 or y >= BOARD_SIZE: continue
-        jump_index = coord_to_index(x, y)
-        piece = get_piece(board, jump_index)
-        if piece == EMPTY and _jumped_over_single_piece(board, index, jump_index): 
-            jumps.append(jump_index)
+    dir_x = 1
+    for dir_y in directions:
+        for dir_x in [-1, 1]:
+            for dist in range(2, length + 1):
+                pos_y = y + (dir_y * dist)
+                if pos_y < 0 or pos_y >= BOARD_SIZE: continue
+                pos_x = x + (dir_x * dist)
+                if pos_x < 0 or pos_x >= BOARD_SIZE: continue
+                jump_index = coord_to_index(pos_x, pos_y)
+                piece = get_piece(board, jump_index)
+                if piece == EMPTY and _jumped_over_single_piece(board, index, jump_index):
+                    jumps.append(jump_index)
 
     return jumps
 
@@ -271,11 +268,10 @@ def print_board(board, clear_screen=True):
         is_white_piece = piece <= WHITE_KING
         is_selected = index in SELECTED
         is_targeted = index in TARGETS
+        
         style = get_style(is_white_cell, is_white_piece, is_selected, is_targeted)
         terminal.set_style(style)
-        
-        str_piece = PIECES_TO_STR[piece]
-        print(' %s ' % str_piece, end='')
+        print(' %s ' % PIECES_TO_STR[piece], end='')
 
         if x == BOARD_SIZE - 1:
             _print_vertical_header(BOARD_SIZE - y)
