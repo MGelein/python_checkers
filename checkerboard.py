@@ -198,25 +198,22 @@ def get_possible_moves_from(board, index):
     is_pawn = piece % 2 != 0
     is_black = piece >= BLACK_PAWN
     x, y = index_to_coord(index)
-    direction = 1 if is_black else -1
+    direction = [1, -1] if not is_pawn else ([1] if is_black else [-1])
     length = 1 if is_pawn else BOARD_SIZE
 
-    legals = []
-    for dist in range(length + 1):
-        forward = y + (direction * dist)
-        backward = y - (direction * dist)
-        left = x - dist
-        right = x + dist
-        legals += [(left, forward), (right, forward)]
-        if not is_pawn: legals += [(left, backward), (right, backward)]
-
     moves = []
-    for x, y in legals:
-        if x < 0 or x >= BOARD_SIZE or y < 0 or y >= BOARD_SIZE: continue
-        move_index = coord_to_index(x, y)
-        piece = get_piece(board, move_index)
-        if piece == EMPTY: moves.append(move_index)
-
+    dir_x = 1
+    for dir_y in directions:
+        for dir_x in [-1, 1]:
+            for dist in range(length + 1):
+                pos_y = y + (dir_y * dist)
+                if pos_y < 0 or y >= BOARD_SIZE: continue
+                pos_x = x + (dir_x * dist)
+                if pos_x < 0 or x >= BOARD_SIZE: continue
+                move_index = coord_to_index(x, y)
+                piece = get_piece(board, move_index)
+                if piece == EMPTY: moves.append(move_index)
+                
     return moves
 
 def get_score(board):
