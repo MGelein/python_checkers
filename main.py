@@ -25,8 +25,8 @@ def main():
     
         checkerboard.clear_target()
         checkerboard.set_selected(sel_index)
-        to_index = -1
 
+        to_index = -1
         while to_index < 0:
             move_indeces = checkerboard.get_possible_moves_from(board, sel_index)
             if len(move_indeces) < 1: break
